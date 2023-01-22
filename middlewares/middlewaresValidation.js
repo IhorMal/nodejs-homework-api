@@ -15,17 +15,17 @@ module.exports = {
           });
         
           const contact = schema.validate(req.body);
+          
           if (contact.error) {
-            res.status(400);
-            res.json({"message": "missing required name field"})
+            const error = contact.error.details[0].message;
+            res.status(400).json({"message": `${error.replace(/[^a-zа-яё0-9\s]/gi)}`})
             return
           }
           next()
     },
     validationUpdateContact: (req, res, next) => {
         if (Object.keys(req.body).length === 0) {
-            res.status(400)
-            res.json({ "message": "missing fields"})
+            res.status(400).json({ "message": "missing fields"})
             return
         }
         const schema = Joi.object({
@@ -42,10 +42,11 @@ module.exports = {
         
           const contact = schema.validate(res.body);
           if (contact.error) {
-            return false
+            const error = contact.error.details[0].message;
+             res.status(400).json({"message": `${error.replace(/[^a-zа-яё0-9\s]/gi)}`})
+             return
           }
           
-          next()
-        
+          next()  
     }
 }
