@@ -40,7 +40,8 @@ module.exports = {
                   
           });
         
-          const contact = schema.validate(res.body);
+          const contact = schema.validate(req.body);
+          
           if (contact.error) {
             const error = contact.error.details[0].message;
              res.status(400).json({"message": `${error.replace(/[^a-zа-яё0-9\s]/gi)}`})
