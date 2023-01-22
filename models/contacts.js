@@ -21,13 +21,13 @@ const getContactById = async (contactId) => {
 
 const removeContact = async (contactId) => {
   const contacts = await readContacts()
-  const id = contacts.findIndex(element => String(contactId) === element.id)
+  const indexContact = contacts.findIndex(element => String(contactId) === element.id)
 
-  if (id === -1) {
+  if (indexContact === -1) {
     return null
   }
 
-  const filterContacts = contacts.filter((element, index)=> index !== id)
+  const filterContacts = contacts.filter((element, index)=> index !== indexContact)
 
   fs.writeFile(contactsPath, JSON.stringify(filterContacts));
   return true
