@@ -1,4 +1,5 @@
-const express = require('express')
+const express = require('express');
+const { validationAddContact, validationUpdateContact } = require('../../middlewares/middlewaresValidation');
 const { listContacts, getContactById, addContact, updateContact, removeContact } = require('../../models/contacts')
 
 const router = express.Router()
@@ -20,15 +21,9 @@ router.get('/:contactId', async (req, res, next) => {
   res.json({item})
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', validationAddContact, async (req, res, next) => {
   const itemAdd = await addContact(req.body);
-  console.log(itemAdd)
-  if(!itemAdd) {
-     res.json({"message": "missing required name field"})
-     res.status(400)
-     return
-  }
-  res.json({itemAdd})
+  res.json({...itemAdd})
 })
 
 router.delete('/:contactId', async (req, res, next) => {
@@ -43,12 +38,7 @@ if (!contact) {
   
 })
 
-router.put('/:contactId', async (req, res, next) => {
-  if (Object.keys(req.body).length === 0) {
-    res.status(400)
-    res.json({ "message": "missing fields"})
-    return
-  }
+router.put('/:contactId',  validationUpdateContact, async (req, res, next) => {
   const contact = await updateContact(req.params.contactId, req.body);
   if (!contact) {
     res.status(404)
