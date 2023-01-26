@@ -1,69 +1,36 @@
-const fs = require("fs").promises;
-const path = require('path');
-const nanoid = require("nanoid");
-const contactsPath = path.join(__dirname.split('contacts')[0], './contacts.json');
-
-const readContacts = async() => {
-  const js = await fs.readFile(contactsPath);
-  return JSON.parse(js);
-}
+const Contact = require("../service/schemaContact");
 
 const listContacts = async () => {
-  return await readContacts()
+  return await Contact.find()
 }
-
 const getContactById = async (contactId) => {
-  const contacts = await readContacts()
-  return contacts.find(item => {
-    return item.id === contactId
-  })
+ return Contact.findOne({ _id: contactId })
 }
 
 const removeContact = async (contactId) => {
-  const contacts = await readContacts()
-  const indexContact = contacts.findIndex(element => String(contactId) === element.id)
-
-  if (indexContact === -1) {
-    return null
-  }
-
-  const filterContacts = contacts.filter((element, index)=> index !== indexContact)
-
-  fs.writeFile(contactsPath, JSON.stringify(filterContacts));
-  return true
+  return Contact.findByIdAndRemove({ _id: contactId })
 }
 
-const addContact = async (body) => {
-  const contacts = await readContacts()
-
-  const {name, email, phone} = body;
-  const contactNew = {
-    id: nanoid(),
-    name,
-    email,
-    phone,
-  }
-
-  contacts.push(contactNew)
-  fs.writeFile(contactsPath, JSON.stringify(contacts));
-  return contactNew
+const addContact = async ({name, email, phone}) => {
+  return Contact.create({ name, email, phone })
 }
 
 const updateContact = async (contactId, body) => {
-  const contacts = await readContacts()
-  const id = contacts.findIndex(contact => contact.id === String(contactId))
-  if (id === -1) {
-    return null
-  }
-
-  contacts[id] = {...contacts[id], ...body}
-  fs.writeFile(contactsPath, JSON.stringify(contacts));
-  return contacts[id]
+  return Contact.findByIdAndUpdate({ _id: contactId }, body, { new: true })
 }
+const updateStatusContact = async (body,{contactId}) => {
+  const {favorite} = body
+  return await Contact.findByIdAndUpdate(
+      contactId, { favorite }, { new: true })
+ 
+ 
+}
+
 module.exports = {
   listContacts,
   getContactById,
   removeContact,
   addContact,
   updateContact,
+  updateStatusContact,
 }
