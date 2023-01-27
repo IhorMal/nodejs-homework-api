@@ -9,7 +9,7 @@ router.get('/', async (req, res, next) => {
     const data = await listContacts();
     res.status(200).json(data)
   } catch (error) {
-    console.log(error.message)
+    res.status(404).json(error.message.replace(/[^a-zа-яё0-9\s]/gi, ''))
   }
 })
 
@@ -18,7 +18,7 @@ router.get('/:contactId', async (req, res, next) => {
     const item = await getContactById(req.params.contactId);
     res.status(200).json(item)
   } catch (error) {
-    res.status(404).json({ 'message': "Not found" })
+    res.status(404).json(error.message.replace(/[^a-zа-яё0-9\s]/gi, ''))
   }
 })
 
@@ -27,16 +27,19 @@ router.post('/', validationAddContact, async (req, res, next) => {
     const itemAdd = await addContact(req.body);
     res.status(200).json(itemAdd)
  } catch (error) {
-    console.log(error.message)
+    res.status(404).json(error.message.replace(/[^a-zа-яё0-9\s]/gi, ''))
  }
 })
 
 router.delete('/:contactId', async (req, res, next) => {
  try {
-    await removeContact(req.params.contactId);
-    res.status(200).json({ 'message': 'message: contact deleted' })
+   const contact = await removeContact(req.params.contactId);
+  if(contact){
+    return res.status(200).json({ 'message': 'message: contact deleted' })
+   }
+    res.status(404).json({message: "Not Found"});
  } catch (error) {
-    res.status(404).json({ 'message': 'message: Not found' })
+    res.status(404).json(error.message.replace(/[^a-zа-яё0-9\s]/gi, ''))
  }
 })
 
@@ -45,17 +48,18 @@ try {
     const contact = await updateContact(req.params.contactId, req.body);
     res.status(200).json(contact)
 } catch (error) {
-    res.status(404).json({ message: 'Not found' })
+    res.status(404).json(error.message.replace(/[^a-zа-яё0-9\s]/gi, ''))
 }
 })
 
 router.patch('/:contactId/favorite', validationUpdateStatusContact, async (req, res, next) => {
  try {
-    const {body, params} = req;
-    const contact = await updateStatusContact(body, params);
+    const {favorite} = req.body;
+    const {contactId} = req.params;
+    const contact = await updateStatusContact(favorite, contactId);
     res.status(200).json(contact)
  } catch (error) {
-    res.status(404).json({"message ":" Not found "})
+    res.status(404).json(error.message.replace(/[^a-zа-яё0-9\s]/gi, ''))
  }
 }) 
 

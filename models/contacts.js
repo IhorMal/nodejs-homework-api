@@ -1,4 +1,4 @@
-const Contact = require("../service/schemaContact");
+const Contact = require("../service/contactSchema");
 
 const listContacts = async () => {
   return await Contact.find()
@@ -18,12 +18,9 @@ const addContact = async ({name, email, phone}) => {
 const updateContact = async (contactId, body) => {
   return Contact.findByIdAndUpdate({ _id: contactId }, body, { new: true })
 }
-const updateStatusContact = async (body,{contactId}) => {
-  const {favorite} = body
+const updateStatusContact = async (favorite, contactId) => {
   return await Contact.findByIdAndUpdate(
       contactId, { favorite }, { new: true })
- 
- 
 }
 
 module.exports = {
