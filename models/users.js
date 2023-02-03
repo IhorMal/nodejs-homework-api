@@ -12,7 +12,7 @@ const loginUser = async (_id,token) => {
   return  await Users.findByIdAndUpdate(_id, {token})
 }
 
-const logoutUser = async (_id,token) => {
+const logoutUser = async (_id) => {
   return  await Users.findByIdAndUpdate(_id, {token: undefined})
 
 }

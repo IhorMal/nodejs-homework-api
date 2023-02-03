@@ -24,7 +24,7 @@ router.post('/users/login', validationRagister ,async (req, res, next) => {
     try {
         const { email, password } = req.body
         const user = await Users.findOne({email})
-
+        
     if (!user || !user.validPassword(password)) {
       return res.status(401).json({"message": "Email or password is wrong"})
     }
@@ -43,11 +43,11 @@ router.post('/users/login', validationRagister ,async (req, res, next) => {
 
 router.post('/users/logout', authenticate ,async (req, res, next) => {
    try {
-    const {_id, token} = req.user
-    await logoutUser(_id, token)
-    res.status(204)
+    const {_id} = req.user
+    await logoutUser(_id)
+    return res.status(204).json('fssf')
    } catch (error) {
-    res.status(400).json(error.message)
+   return res.status(400).json(error.message)
    }
 })
 

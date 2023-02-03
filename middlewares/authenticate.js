@@ -11,11 +11,11 @@ const authenticate = async (req, res, next) => {
     const [, token] = req.headers.authorization.split(" ");
     const { id } = jwt.decode(token, SECRET);
     const user = await Users.findById(id);
-    
     if (!user) {
     return  res.status(401).json({messege: "Not authorized"})
     }
     req.user = user;
+
     next();
   } catch (error) {
     return  res.status(404).json(error.messege)
