@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST
-const SECRET = process.env.SECRET
+const HOST = process.env.HOST;
+const SECRET = process.env.SECRET || "simple secret";
 
-module.exports = {PORT, HOST, SECRET}
+module.exports = {PORT, HOST, SECRET};

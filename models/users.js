@@ -17,15 +17,10 @@ const logoutUser = async (_id) => {
 
 }
 
-const currentUser = async (_id) => {
-  return  await Users.find(_id, {email: 1, subscription: 1, _id: 0})
-}
-
 
 
 module.exports = {
     registerUser,
     loginUser,
     logoutUser,
-    currentUser
 }

@@ -1,12 +1,12 @@
 const express = require('express');
 const { authenticate } = require('../../middlewares/authenticate');
-const { validationRagister } = require('../../middlewares/validationAuth');
-const { registerUser, loginUser, logoutUser, currentUser } = require('../../models/users');
-const creatingToken = require('../../service/creatingToken');
+const { validationRagister, validationLogin } = require('../../middlewares/validationAuth');
+const { registerUser, loginUser, logoutUser } = require('../../models/users');
+const generateUserToken = require('../../service/generateUserToken');
 const Users = require('../../service/usersSchema');
 const router = express.Router()
 
-router.post('/users/register', validationRagister ,async (req, res, next) => {
+router.post('/register', validationRagister ,async (req, res, next) => {
 try {   
     const {email, subscription} = await registerUser(req.body)
     res.json({email, subscription})
@@ -20,7 +20,7 @@ try {
 }
 })
 
-router.post('/users/login', validationRagister ,async (req, res, next) => {
+router.post('/login', validationLogin ,async (req, res, next) => {
     try {
         const { email, password } = req.body
         const user = await Users.findOne({email})
@@ -30,33 +30,31 @@ router.post('/users/login', validationRagister ,async (req, res, next) => {
     }
 
     const {_id, subscription} = user;
-    const token = creatingToken(_id, email)
+    const token = generateUserToken(_id, email)
 
     await loginUser(_id, token)
 
-    return res.status(200).json({token, user: {email, subscription}})
+    return res.status(200).json({token, user: {_id, subscription}})
     } catch (error) {
         return res.status(400).json(error.message)
     }
 })
 
-
-router.post('/users/logout', authenticate ,async (req, res, next) => {
+router.post('/logout', authenticate ,async (req, res, next) => {
    try {
     const {_id} = req.user
     await logoutUser(_id)
-    return res.status(204).json('fssf')
+    return res.status(204)
    } catch (error) {
    return res.status(400).json(error.message)
    }
 })
 
 
-router.get('/users/current', authenticate ,async (req, res, next) => {
+router.get('/current', authenticate ,async (req, res, next) => {
    try {
-    const {_id} = req.user
-    const user = await currentUser(_id)
-    res.status(200).json(...user)
+    const {email, subscription} = req.user
+    res.status(200).json({email,subscription})
    } catch (error) {
     res.status(400).json(error.message)
    }
