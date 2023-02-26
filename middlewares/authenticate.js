@@ -4,7 +4,6 @@ const Users = require("../service/usersSchema");
 
 const authenticate = async (req, res, next) => {
   try {
-    
     if (!req.headers.authorization) {
     return  res.status(400).json({messege: "Signature not exist"})
     }
@@ -13,7 +12,6 @@ const authenticate = async (req, res, next) => {
       return  res.status(400).json({messege: `The token ${tokenType} type is not valid`})
     }
     const {id} = jwt.verify(token, SECRET);
-
     const user = await Users.findById(id);
     if (!user) {
     return  res.status(401).json({messege: "Not authorized"})
@@ -22,6 +20,7 @@ const authenticate = async (req, res, next) => {
 
     next();
   } catch (error) {
+  
     return  res.status(404).json(error.messege)
   }
 };

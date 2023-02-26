@@ -1,13 +1,20 @@
 const express = require('express');
 const { authenticate } = require('../../middlewares/authenticate');
 const { validationRagister, validationLogin } = require('../../middlewares/validationAuth');
-const { registerUser, loginUser, logoutUser } = require('../../models/users');
+const { registerUser, loginUser, logoutUser, avatarsUser } = require('../../models/users');
 const generateUserToken = require('../../service/generateUserToken');
 const Users = require('../../service/usersSchema');
+const path = require('path');
+const fs = require('fs').promises;
+const Jimp = require("jimp");
+const upload = require('../../middlewares/storage');
 const router = express.Router()
 
+const storeImage = path.join(process.cwd(), 'public', 'avatars');
+
+
 router.post('/register', validationRagister ,async (req, res, next) => {
-try {   
+try {
     const {email, subscription} = await registerUser(req.body)
     res.json({email, subscription})
 
@@ -60,6 +67,29 @@ router.get('/current', authenticate ,async (req, res, next) => {
    }
 })
 
+router.patch('/public/avatars', authenticate, upload.single('avatars'),async (req, res, next) => {
+   try {
+    const {file, user, protocol} = req;
+    const img = await Jimp.read(file.path)
+    await img.resize(250,250)
+    await img.writeAsync(file.path);
 
+    const fileName = path.join(storeImage, file.filename);
+
+    const fullUrl = `${protocol}://${req.get('host')}/avatars/${file.filename}`
+    try {
+      await fs.rename(file.path, fileName);
+    } catch (err) {
+      await fs.unlink(file.path);
+      return res.status(400).json(err.message)
+    }
+
+    await avatarsUser(user._id, fullUrl)
+
+    res.status(200).json({fullUrl})
+   } catch (error) {
+    res.status(401).json(error.message)
+   }
+})
 
 module.exports = router;

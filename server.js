@@ -12,7 +12,7 @@ async function start() {
     });
       console.log("Database connection successful")
       app.listen(PORT, () => {
-      console.log("Server runnin. Use our API on port: 3000")
+      console.log(`Server runnin. Use our API on port: ${PORT}`)
     })
   } catch (error) {
     console.log(error.message)
