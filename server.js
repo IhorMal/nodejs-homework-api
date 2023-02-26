@@ -1,12 +1,12 @@
 const app = require('./app')
 const mongoose = require('mongoose');
-const { HOST, PORT } = require('./service/serverConfiguration');
+const { HOST_DB, PORT } = require('./service/serverConfiguration');
 
 mongoose.set('strictQuery', true);
 
 async function start() {
   try {
-    await mongoose.connect(HOST, {
+    await mongoose.connect(HOST_DB, {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });

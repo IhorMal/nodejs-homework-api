@@ -6,19 +6,12 @@ const routerAuth  = require('./routes/api/auth')
 const app = express()
 
 app.use(express.static('public'))
-// // app.use('/static', express.static('public'));
-// const path = require('path');
-// app.use('/avatars',express.static(path.join(__dirname, 'public/avatars')));
-// // const fullPath = this.path.join(__dirname, "public");
-
-// app.use(express.static(fullPath))
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 
 app.use(logger(formatsLogger))
 app.use(cors())
 app.use(express.json())
-app.set('trust proxy', true)
 app.use('/api/users', routerAuth)
 app.use('/api/contacts', contactsRouter)
 

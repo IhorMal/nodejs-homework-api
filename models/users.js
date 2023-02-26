@@ -1,5 +1,7 @@
 const Users = require("../service/usersSchema")
 const gravatar = require('gravatar');
+const path = require('path');
+const { HOST } = require("../service/serverConfiguration");
 
 const registerUser = async (body) => {
     const {email, password, subscription} = body
@@ -18,8 +20,13 @@ const logoutUser = async (_id) => {
 
 }
 
-const avatarsUser = async (_id, avatarURL) => {
-  return  await Users.findByIdAndUpdate(_id, {avatarURL: avatarURL})
+const avatarsUser = async (_id, name) => {
+  const fileName = path.join('avatars', name);
+  const fixedUrl = fileName.replace(/\\/g, '/');
+  
+  const {avatarURL} = await Users.findByIdAndUpdate(_id, {avatarURL: fixedUrl}, { new: true })
+  
+  return HOST+avatarURL
 }
 
 

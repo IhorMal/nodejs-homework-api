@@ -67,26 +67,25 @@ router.get('/current', authenticate ,async (req, res, next) => {
    }
 })
 
-router.patch('/public/avatars', authenticate, upload.single('avatars'),async (req, res, next) => {
+router.patch('/avatars', authenticate, upload.single('avatars'),async (req, res, next) => {
    try {
-    const {file, user, protocol} = req;
+    const {file, user} = req;
+    
     const img = await Jimp.read(file.path)
     await img.resize(250,250)
     await img.writeAsync(file.path);
 
     const fileName = path.join(storeImage, file.filename);
-
-    const fullUrl = `${protocol}://${req.get('host')}/avatars/${file.filename}`
+  
     try {
       await fs.rename(file.path, fileName);
     } catch (err) {
       await fs.unlink(file.path);
       return res.status(400).json(err.message)
     }
+    const avatarURL = await avatarsUser(user._id, file.filename)
 
-    await avatarsUser(user._id, fullUrl)
-
-    res.status(200).json({fullUrl})
+    res.status(200).json({avatarURL})
    } catch (error) {
     res.status(401).json(error.message)
    }
