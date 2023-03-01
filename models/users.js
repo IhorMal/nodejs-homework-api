@@ -21,10 +21,8 @@ const logoutUser = async (_id) => {
 }
 
 const avatarsUser = async (_id, name) => {
-  const fileName = path.join('avatars', name);
-  const fixedUrl = fileName.replace(/\\/g, '/');
-  
-  const {avatarURL} = await Users.findByIdAndUpdate(_id, {avatarURL: fixedUrl}, { new: true })
+  const fileName = `/avatars/${name}`;  
+  const {avatarURL} = await Users.findByIdAndUpdate(_id, {avatarURL: fileName}, { new: true })
   
   return HOST+avatarURL
 }
