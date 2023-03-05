@@ -1,8 +1,9 @@
 
 const sgMail = require('@sendgrid/mail');
+const { PORT } = require('../service/serverConfiguration');
 
 const sendingMail = async (email, verificationToken) => {
-    const href = `http://localhost:3000/api/users/verify/${verificationToken}`
+    const href = `http://localhost:${PORT}/api/users/verify/${verificationToken}`
     const msg = {
       to: email,
       from: 'dimendor@meta.ua', 
