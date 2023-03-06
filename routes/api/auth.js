@@ -3,12 +3,15 @@ const { authenticate } = require("../../middlewares/authenticate");
 const {
   validationRagister,
   validationLogin,
+  validationVerify,
 } = require("../../middlewares/validationAuth");
 const {
   registerUser,
   loginUser,
   logoutUser,
   avatarsUser,
+  verificationUser,
+  verificationUserEmail,
 } = require("../../models/users");
 const generateUserToken = require("../../service/generateUserToken");
 const Users = require("../../service/usersSchema");
@@ -16,13 +19,24 @@ const path = require("path");
 const fs = require("fs").promises;
 const Jimp = require("jimp");
 const upload = require("../../middlewares/storage");
+const nanoid = require('nanoid')
 const router = express.Router();
+const sgMail = require('@sendgrid/mail');
+const { SENDGRID_API_KEY } = require("../../service/serverConfiguration");
+const { sendingMail } = require("../../verify/sendingLetter");
+
+sgMail.setApiKey(SENDGRID_API_KEY)
+
 
 const storeImage = path.join(process.cwd(), "public", "avatars");
 
 router.post("/register", validationRagister, async (req, res, next) => {
   try {
-    const { email, subscription } = await registerUser(req.body);
+    const verificationToken = nanoid();
+
+    const { email, subscription } = await registerUser(req.body, verificationToken);
+    await sendingMail(email, verificationToken)
+
     res.json({ email, subscription });
   } catch (error) {
     if (error.code === 11000) {
@@ -37,10 +51,42 @@ router.post("/register", validationRagister, async (req, res, next) => {
   }
 });
 
+router.get("/verify/:verificationToken",  async (req, res, next) => {
+  try {
+    const {verificationToken} = req.params
+    const user = await verificationUser(verificationToken)
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json({ message: "Verification success" }).status(200);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+
+router.post("/verify", validationVerify, async (req, res, next) => {
+try {
+  const verificationToken = nanoid();
+  const {email} = req.body
+  const user = await verificationUserEmail(email, verificationToken)
+  
+    if (!user) {
+      return res.status(404).json({ message: "Verification has already been passed" });
+    }
+    await sendingMail(email, verificationToken)
+    
+    res.json({ message: "Verification email sent" }).status(200);
+} catch (error) {
+  res.status(400).json({ message: error.message });
+}
+});
+
 router.post("/login", validationLogin, async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await Users.findOne({ email });
+    const user = await Users.findOne({ email, verify:true});
 
     if (!user || !user.validPassword(password)) {
       return res.status(401).json({ message: "Email or password is wrong" });
